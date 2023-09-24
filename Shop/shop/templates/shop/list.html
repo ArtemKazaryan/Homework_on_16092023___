@@ -1,0 +1,66 @@
+{% extends "shop/base.html" %}
+{% load static %}
+{% block title %}
+    {% if category %}{{ category.name }}{% else %}Товар{% endif %}
+{% endblock %}
+{% block content %}
+    <div class="sidebar">
+        <h3>Категории</h3>
+        <ul>
+            <li {% if not category %}class="selected"{% endif %}>
+                <a href="{% url "shop:product_list" %}">Все товары</a>
+            </li>
+            {% for c in categories %}
+                <li {% if category.slug == c.slug %}class="selected"{% endif %}>
+                    <a href="{{ c.get_absolute_url }}">{{ c.name }}</a>
+                </li>
+            {% endfor %}
+            <li class="selected">
+                <form method="get">
+                    {% csrf_token %}
+                    {#                    <label for="sort_by">Сортировать:</label>#}
+                    <select name="sort_by" id="sort_by">
+                        <option value="">---</option>
+                        <option value="price_low_to_high">Цене (по возрастанию)</option>
+                        <option value="price_high_to_low">Цене (по убыванию)</option>
+                        <option value="date_added_new_to_old">Дате добавления (сначала новые)</option>
+                        <option value="date_added_old_to_new">Дате добавления (сначала старые)</option>
+                    </select>
+                    <button type="submit">Сортировать</button>
+                </form>
+            </li>
+        </ul>
+
+    </div>
+    <div id="main" class="product-list">
+        <h1>{% if category %}{{ category.name }}{% else %}Товары:{% endif %}</h1>
+        {% for product in products %}
+            <div class="item">
+                <a href="{{ product.get_absolute_url }}">
+                    <img src="{% if product.image %}
+                                {{ product.image.url }}
+                              {% else %}
+                                {% static "img/no_image.png" %}
+                              {% endif %}">
+                </a>
+                <a href="{{ product.get_absolute_url }}">{{ product.name }}</a><br>
+                <div>
+                    {{ product.price }}₽
+                    {% if user.is_authenticated %}
+                        <form action="{% url "basket:basket_add" product.id %}" method="post">
+                            {% csrf_token %}
+                            {{ basket_product_form }}
+                            <input type="submit" value="В корзину">
+                        </form>
+                        {% if favorites %}
+                            <a href="{% url 'shop:remove_favorite' product.id %}">Убрать из избранного</a>
+                        {% else %}
+                            <a href="{% url 'shop:add_favorite' product.id %}">В избранное</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

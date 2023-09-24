@@ -1,0 +1,26 @@
+{% extends 'shop/base.html' %}
+{% block title %}
+    Профиль
+{% endblock %}
+{% block content %}
+    <h1>Данные профиля</h1>
+    <p>Имя: {{ profile.name }}</p>
+    <p>Почта: {{ profile.adress }}</p>
+    <p>Телефон: {{ profile.phone_number }}</p>
+    <p>Количество покупок: {{ profile.purchase_history }}</p>
+    {% if request.session.cart %}
+        <h2>Корзина</h2>
+
+        <form method="post" action="{% url 'add_to_cart' product.id %}">
+            {% csrf_token %}
+            <ul>
+                {% for item in request.session.cart %}
+                    <li>{{ product.name }} - {{ item.quantity }} - {{ product.price }}</li>
+                {% endfor %}
+                <button type="submit">Купить</button>
+            </ul>
+        </form>
+    {% else %}
+        <h2>Корзина пуста.</h2>
+    {% endif %}
+{% endblock %}
